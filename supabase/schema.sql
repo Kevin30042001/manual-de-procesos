@@ -66,3 +66,21 @@ create policy "admin write processes" on processes for all using (
 create policy "admin write steps"     on steps     for all using (
   (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
 );
+
+-- Storage: bucket `screenshots` (created manually in dashboard as public)
+-- Public reads are automatic on public buckets; writes need explicit policies:
+drop policy if exists "auth upload screenshots" on storage.objects;
+drop policy if exists "auth update screenshots" on storage.objects;
+drop policy if exists "auth delete screenshots" on storage.objects;
+
+create policy "auth upload screenshots" on storage.objects for insert
+  to authenticated
+  with check (bucket_id = 'screenshots');
+
+create policy "auth update screenshots" on storage.objects for update
+  to authenticated
+  using (bucket_id = 'screenshots');
+
+create policy "auth delete screenshots" on storage.objects for delete
+  to authenticated
+  using (bucket_id = 'screenshots');
