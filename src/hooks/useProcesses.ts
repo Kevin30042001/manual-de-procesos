@@ -2,8 +2,13 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { Process } from '../types'
 
+// Extended type used internally — includes steps' text/warning for search
+interface ProcessWithSearch extends Process {
+  _search_blob?: string
+}
+
 export function useProcesses() {
-  const [processes, setProcesses] = useState<Process[]>([])
+  const [processes, setProcesses] = useState<ProcessWithSearch[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetch = async () => {
@@ -13,15 +18,26 @@ export function useProcesses() {
         `
         *,
         system:systems(*),
-        step_count:steps(count)
+        steps(text, warning)
       `
       )
       .order('created_at', { ascending: false })
 
-    const mapped = (data ?? []).map((p: any) => ({
-      ...p,
-      step_count: p.step_count?.[0]?.count ?? 0,
-    }))
+    const mapped: ProcessWithSearch[] = (data ?? []).map((p: any) => {
+      const stepsArr = Array.isArray(p.steps) ? p.steps : []
+      const searchBlob = stepsArr
+        .map(
+          (s: { text: string; warning: string | null }) =>
+            `${s.text ?? ''} ${s.warning ?? ''}`
+        )
+        .join(' ')
+        .toLowerCase()
+      return {
+        ...p,
+        step_count: stepsArr.length,
+        _search_blob: searchBlob,
+      }
+    })
     setProcesses(mapped)
     setLoading(false)
   }
@@ -46,7 +62,7 @@ export function useProcesses() {
   }
 
   const filter = (
-    all: Process[],
+    all: ProcessWithSearch[],
     systemId: string | null,
     search: string,
     favOnly: boolean
@@ -59,7 +75,8 @@ export function useProcesses() {
         return (
           p.title.toLowerCase().includes(q) ||
           (p.category ?? '').toLowerCase().includes(q) ||
-          p.tags.some((t) => t.toLowerCase().includes(q))
+          p.tags.some((t) => t.toLowerCase().includes(q)) ||
+          (p._search_blob ?? '').includes(q)
         )
       }
       return true
