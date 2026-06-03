@@ -62,15 +62,29 @@ export function ProcessDetailPage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <div className="mx-auto max-w-2xl px-4 py-8">
+      <div className="mx-auto max-w-3xl px-4 py-8 md:py-12">
         <Link
           to="/"
-          className="mb-6 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink"
+          className="mb-8 inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
         >
-          ← Volver
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-4 w-4"
+          >
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+          Volver al manual
         </Link>
 
-        <div className="mb-2 flex items-center gap-3">
+        {/* Header */}
+        <div className="mb-3 flex items-center gap-3">
           {process.system && (
             <SystemBadge
               name={process.system.name}
@@ -79,7 +93,9 @@ export function ProcessDetailPage() {
           )}
           <button
             onClick={toggleFavorite}
-            className="text-lg text-warn transition-colors hover:text-warn/70"
+            className={`text-2xl leading-none transition-all duration-200 hover:scale-125 ${
+              process.is_favorite ? 'text-warn' : 'text-muted/40 hover:text-warn/70'
+            }`}
             aria-label={
               process.is_favorite
                 ? 'Quitar de favoritos'
@@ -90,42 +106,77 @@ export function ProcessDetailPage() {
           </button>
         </div>
 
-        <h1 className="font-serif text-2xl font-bold text-ink">
+        <h1 className="font-serif text-3xl font-bold leading-tight text-ink md:text-4xl">
           {process.title}
         </h1>
         {process.category && (
-          <p className="mt-1 text-sm text-muted">{process.category}</p>
+          <p className="mt-2 font-serif text-base italic text-muted">
+            {process.category}
+          </p>
         )}
 
-        <hr className="my-6 border-border" />
+        {/* Ornamental divider */}
+        <div className="my-8 flex items-center gap-4">
+          <span className="h-px flex-1 bg-border" />
+          <span className="font-serif text-sm text-muted/60">❦</span>
+          <span className="h-px flex-1 bg-border" />
+        </div>
 
+        {/* Steps timeline */}
         <div className="flex flex-col">
           {stepsLoading ? (
             <p className="text-sm text-muted">Cargando pasos...</p>
           ) : (
             steps.map((step, i) => (
-              <StepItem key={step.id} step={step} index={i} />
+              <StepItem
+                key={step.id}
+                step={step}
+                index={i}
+                isLast={i === steps.length - 1}
+              />
             ))
           )}
         </div>
 
+        {/* Tags */}
         {process.tags.length > 0 && (
-          <div className="mt-6 flex flex-wrap gap-2">
-            {process.tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted"
-              >
-                {tag}
-              </span>
-            ))}
+          <div className="mt-8 border-t border-border pt-6">
+            <p className="mb-3 font-serif text-xs font-semibold uppercase tracking-wider text-muted">
+              Etiquetas
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {process.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-muted shadow-sm"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
           </div>
         )}
 
+        {/* Admin actions */}
         {isAdmin && (
-          <div className="mt-8 flex gap-3">
+          <div className="mt-10 flex flex-wrap gap-3 border-t border-border pt-6">
             <Link to={`/processes/${process.id}/edit`}>
-              <Button variant="secondary">Editar</Button>
+              <Button variant="secondary">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="mr-1.5 h-4 w-4"
+                >
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+                Editar
+              </Button>
             </Link>
             <Button variant="danger" onClick={handleDelete}>
               Eliminar
