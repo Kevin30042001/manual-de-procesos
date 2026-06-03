@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=Karla:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg:        #f4f0e8;
+  --color-surface:   #fffdf8;
+  --color-ink:       #2c2924;
+  --color-muted:     #8b8377;
+  --color-border:    #e6ded1;
+  --color-accent:    #4d7d68;
+  --color-accent-bg: #e7efe9;
+  --color-warn:      #c89a54;
+  --color-warn-bg:   #f6ecd8;
+}
+
+html, body, #root {
+  min-height: 100vh;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: 'Karla', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
