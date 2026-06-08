@@ -20,21 +20,34 @@ export interface Process {
   step_count?: number
 }
 
+export interface SubStep {
+  text: string
+}
+
 export interface Step {
   id: string
   process_id: string
   order: number
   text: string
   warning: string | null
-  image_url: string | null
+  image_url: string | null      // legado: primera imagen (se conserva por compatibilidad)
+  image_urls: string[]          // varias capturas
+  substeps: SubStep[]           // sub-pasos
+}
+
+// Imagen pendiente de subir (solo vive en el formulario, no se guarda así)
+export interface NewImage {
+  file: File
+  preview: string // object URL local para vista previa
 }
 
 export interface StepDraft {
-  id?: string           // present when editing existing step
+  id?: string                // presente al editar un paso existente
   order: number
   text: string
   warning: string
-  image_url: string | null
-  imageFile?: File      // pending upload, not yet in Storage
-  imagePreview?: string // local object URL for preview
+  image_url: string | null   // legado
+  image_urls: string[]       // URLs ya subidas que se conservan
+  newImages: NewImage[]      // archivos pendientes de subir
+  substeps: SubStep[]
 }
