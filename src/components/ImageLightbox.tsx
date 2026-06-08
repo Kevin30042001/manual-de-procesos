@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 
 interface Props {
-  src: string
-  caption: string
+  images: string[]
+  startIndex?: number
+  caption?: string
   onClose: () => void
 }
 
@@ -10,11 +11,11 @@ const MIN_SCALE = 1
 const MAX_SCALE = 5
 const STEP = 0.4
 
-export function ImageLightbox({ src, caption, onClose }: Props) {
+export function ImageLightbox({ images, startIndex = 0, caption, onClose }: Props) {
+  const [index, setIndex] = useState(startIndex)
   const [scale, setScale] = useState(1)
   const [offset, setOffset] = useState({ x: 0, y: 0 })
 
-  // sx/sy: punto inicial del gesto · moved: si hubo arrastre (para no cerrar al soltar)
   const drag = useRef({ on: false, sx: 0, sy: 0, bx: 0, by: 0, moved: false })
   const pinch = useRef({ on: false, dist: 0, base: 1 })
 
@@ -33,10 +34,23 @@ export function ImageLightbox({ src, caption, onClose }: Props) {
     })
   }, [])
 
+  const goTo = useCallback(
+    (next: number) => {
+      if (images.length < 2) return
+      setIndex((next + images.length) % images.length)
+      // Reinicia el zoom al cambiar de imagen
+      setScale(1)
+      setOffset({ x: 0, y: 0 })
+    },
+    [images.length]
+  )
+
   // Teclado + bloqueo de scroll del fondo
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
+      else if (e.key === 'ArrowRight') goTo(index + 1)
+      else if (e.key === 'ArrowLeft') goTo(index - 1)
       else if (e.key === '+' || e.key === '=') zoomBy(STEP)
       else if (e.key === '-') zoomBy(-STEP)
       else if (e.key === '0') reset()
@@ -48,15 +62,13 @@ export function ImageLightbox({ src, caption, onClose }: Props) {
       window.removeEventListener('keydown', handler)
       document.body.style.overflow = prev
     }
-  }, [onClose, zoomBy, reset])
+  }, [index, onClose, goTo, zoomBy, reset])
 
-  // Rueda del mouse -> zoom
   const onWheel = (e: React.WheelEvent) => {
     e.preventDefault()
     zoomBy(e.deltaY < 0 ? STEP : -STEP)
   }
 
-  // Arrastrar para desplazar (solo con zoom)
   const onMouseDown = (e: React.MouseEvent) => {
     drag.current = {
       on: scale > 1,
@@ -78,13 +90,11 @@ export function ImageLightbox({ src, caption, onClose }: Props) {
     drag.current.on = false
   }
 
-  // Clic en el escenario: cerrar si fue clic limpio fuera de la imagen
   const onStageClick = (e: React.MouseEvent) => {
     const clickedImage = (e.target as HTMLElement).tagName === 'IMG'
     if (!clickedImage && !drag.current.moved) onClose()
   }
 
-  // Táctil: pinch-zoom + arrastre
   const distOf = (t: React.TouchList) =>
     Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY)
 
@@ -117,10 +127,18 @@ export function ImageLightbox({ src, caption, onClose }: Props) {
     drag.current.on = false
   }
 
+  const multiple = images.length > 1
+  const src = images[index]
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 p-4">
       {/* Controles */}
       <div className="absolute right-3 top-3 z-20 flex items-center gap-2">
+        {multiple && (
+          <span className="mr-1 font-sans text-sm tabular-nums text-white/80">
+            {index + 1} / {images.length}
+          </span>
+        )}
         <button
           onClick={() => zoomBy(-STEP)}
           className="flex h-11 w-11 items-center justify-center rounded-lg bg-white/15 text-2xl text-white backdrop-blur transition hover:bg-white/30"
@@ -158,6 +176,28 @@ export function ImageLightbox({ src, caption, onClose }: Props) {
         </button>
       </div>
 
+      {/* Flechas de navegación */}
+      {multiple && (
+        <>
+          <button
+            onClick={() => goTo(index - 1)}
+            className="absolute left-3 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-3xl text-white backdrop-blur transition hover:bg-white/30"
+            title="Anterior (←)"
+            aria-label="Anterior"
+          >
+            ‹
+          </button>
+          <button
+            onClick={() => goTo(index + 1)}
+            className="absolute right-3 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-3xl text-white backdrop-blur transition hover:bg-white/30"
+            title="Siguiente (→)"
+            aria-label="Siguiente"
+          >
+            ›
+          </button>
+        </>
+      )}
+
       {/* Escenario de la imagen */}
       <div
         className="flex h-full w-full items-center justify-center overflow-hidden"
@@ -175,9 +215,9 @@ export function ImageLightbox({ src, caption, onClose }: Props) {
       >
         <img
           src={src}
-          alt={caption}
+          alt={caption ?? `Imagen ${index + 1}`}
           draggable={false}
-          className="max-h-[80vh] max-w-[90vw] select-none rounded-lg shadow-2xl"
+          className="max-h-[78vh] max-w-[90vw] select-none rounded-lg shadow-2xl"
           style={{
             transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
             transition: 'transform 0.08s ease-out',
@@ -187,11 +227,11 @@ export function ImageLightbox({ src, caption, onClose }: Props) {
         />
       </div>
 
-      {/* Pie: caption + ayuda para cerrar */}
+      {/* Pie: caption + ayuda */}
       <div className="mt-3 flex flex-col items-center gap-1 text-center">
         {caption && <p className="font-sans text-sm text-white/85">{caption}</p>}
         <p className="font-sans text-xs text-white/50">
-          Toca fuera de la imagen o presiona Esc para cerrar
+          {multiple ? 'Usa ← → para cambiar · ' : ''}Toca fuera de la imagen o Esc para cerrar
         </p>
       </div>
     </div>
