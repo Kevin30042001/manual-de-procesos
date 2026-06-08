@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState, useCallback } from 'react'
 
 interface Props {
@@ -15,7 +14,8 @@ export function ImageLightbox({ src, caption, onClose }: Props) {
   const [scale, setScale] = useState(1)
   const [offset, setOffset] = useState({ x: 0, y: 0 })
 
-  const drag = useRef({ on: false, sx: 0, sy: 0, bx: 0, by: 0 })
+  // sx/sy: punto inicial del gesto · moved: si hubo arrastre (para no cerrar al soltar)
+  const drag = useRef({ on: false, sx: 0, sy: 0, bx: 0, by: 0, moved: false })
   const pinch = useRef({ on: false, dist: 0, base: 1 })
 
   const clamp = (s: number) => Math.min(MAX_SCALE, Math.max(MIN_SCALE, s))
@@ -58,18 +58,30 @@ export function ImageLightbox({ src, caption, onClose }: Props) {
 
   // Arrastrar para desplazar (solo con zoom)
   const onMouseDown = (e: React.MouseEvent) => {
-    if (scale <= 1) return
-    drag.current = { on: true, sx: e.clientX, sy: e.clientY, bx: offset.x, by: offset.y }
+    drag.current = {
+      on: scale > 1,
+      sx: e.clientX,
+      sy: e.clientY,
+      bx: offset.x,
+      by: offset.y,
+      moved: false,
+    }
   }
   const onMouseMove = (e: React.MouseEvent) => {
     if (!drag.current.on) return
-    setOffset({
-      x: drag.current.bx + (e.clientX - drag.current.sx),
-      y: drag.current.by + (e.clientY - drag.current.sy),
-    })
+    const dx = e.clientX - drag.current.sx
+    const dy = e.clientY - drag.current.sy
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) drag.current.moved = true
+    setOffset({ x: drag.current.bx + dx, y: drag.current.by + dy })
   }
   const endDrag = () => {
     drag.current.on = false
+  }
+
+  // Clic en el escenario: cerrar si fue clic limpio fuera de la imagen
+  const onStageClick = (e: React.MouseEvent) => {
+    const clickedImage = (e.target as HTMLElement).tagName === 'IMG'
+    if (!clickedImage && !drag.current.moved) onClose()
   }
 
   // Táctil: pinch-zoom + arrastre
@@ -86,6 +98,7 @@ export function ImageLightbox({ src, caption, onClose }: Props) {
         sy: e.touches[0].clientY,
         bx: offset.x,
         by: offset.y,
+        moved: false,
       }
     }
   }
@@ -105,28 +118,23 @@ export function ImageLightbox({ src, caption, onClose }: Props) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-ink/90 p-4"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
-      }}
-    >
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 p-4">
       {/* Controles */}
-      <div className="absolute right-4 top-4 z-10 flex items-center gap-2">
+      <div className="absolute right-3 top-3 z-20 flex items-center gap-2">
         <button
           onClick={() => zoomBy(-STEP)}
-          className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface/15 text-xl text-surface transition hover:bg-surface/25"
+          className="flex h-11 w-11 items-center justify-center rounded-lg bg-white/15 text-2xl text-white backdrop-blur transition hover:bg-white/30"
           title="Alejar (−)"
           aria-label="Alejar"
         >
           −
         </button>
-        <span className="min-w-[3.5rem] text-center font-sans text-sm tabular-nums text-surface/90">
+        <span className="min-w-[3.5rem] text-center font-sans text-sm tabular-nums text-white/90">
           {Math.round(scale * 100)}%
         </span>
         <button
           onClick={() => zoomBy(STEP)}
-          className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface/15 text-xl text-surface transition hover:bg-surface/25"
+          className="flex h-11 w-11 items-center justify-center rounded-lg bg-white/15 text-2xl text-white backdrop-blur transition hover:bg-white/30"
           title="Acercar (+)"
           aria-label="Acercar"
         >
@@ -134,7 +142,7 @@ export function ImageLightbox({ src, caption, onClose }: Props) {
         </button>
         <button
           onClick={reset}
-          className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface/15 text-lg text-surface transition hover:bg-surface/25"
+          className="flex h-11 w-11 items-center justify-center rounded-lg bg-white/15 text-lg text-white backdrop-blur transition hover:bg-white/30"
           title="Restablecer (0)"
           aria-label="Restablecer zoom"
         >
@@ -142,7 +150,7 @@ export function ImageLightbox({ src, caption, onClose }: Props) {
         </button>
         <button
           onClick={onClose}
-          className="flex h-10 w-10 items-center justify-center rounded-lg bg-warn/80 text-lg text-surface transition hover:bg-warn"
+          className="ml-1 flex h-11 w-11 items-center justify-center rounded-lg bg-red-500 text-xl font-bold text-white shadow-lg transition hover:bg-red-600"
           title="Cerrar (Esc)"
           aria-label="Cerrar"
         >
@@ -159,6 +167,7 @@ export function ImageLightbox({ src, caption, onClose }: Props) {
         onMouseMove={onMouseMove}
         onMouseUp={endDrag}
         onMouseLeave={endDrag}
+        onClick={onStageClick}
         onDoubleClick={() => (scale > 1 ? reset() : setScale(2.5))}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
@@ -168,7 +177,7 @@ export function ImageLightbox({ src, caption, onClose }: Props) {
           src={src}
           alt={caption}
           draggable={false}
-          className="max-h-[82vh] max-w-[90vw] rounded-lg shadow-xl select-none"
+          className="max-h-[80vh] max-w-[90vw] select-none rounded-lg shadow-2xl"
           style={{
             transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
             transition: 'transform 0.08s ease-out',
@@ -178,7 +187,13 @@ export function ImageLightbox({ src, caption, onClose }: Props) {
         />
       </div>
 
-      {caption && <p className="mt-3 font-sans text-sm text-surface/80">{caption}</p>}
+      {/* Pie: caption + ayuda para cerrar */}
+      <div className="mt-3 flex flex-col items-center gap-1 text-center">
+        {caption && <p className="font-sans text-sm text-white/85">{caption}</p>}
+        <p className="font-sans text-xs text-white/50">
+          Toca fuera de la imagen o presiona Esc para cerrar
+        </p>
+      </div>
     </div>
   )
 }
