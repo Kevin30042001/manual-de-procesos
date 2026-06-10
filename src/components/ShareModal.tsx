@@ -49,20 +49,22 @@ export function ShareModal({ open, onClose, processId, processTitle, isSharedPub
       <div className="flex flex-col gap-5">
 
         {/* Opción: compartir con todos */}
-        <div className="flex items-center justify-between rounded-xl border border-border bg-bg px-4 py-3">
-          <div>
+        <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-bg px-4 py-3">
+          <div className="min-w-0">
             <p className="text-sm font-medium text-ink">Visible para todos</p>
             <p className="text-xs text-muted">Cualquier usuario del sistema puede verlo</p>
           </div>
           <button
             onClick={onTogglePublic}
-            className={`relative h-6 w-11 rounded-full transition-colors duration-200 ${
+            aria-checked={isSharedPublic}
+            role="switch"
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
               isSharedPublic ? 'bg-accent' : 'bg-border'
             }`}
           >
             <span
-              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${
-                isSharedPublic ? 'translate-x-5' : 'translate-x-0.5'
+              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-md ring-0 transition-transform duration-200 ${
+                isSharedPublic ? 'translate-x-5' : 'translate-x-0'
               }`}
             />
           </button>
