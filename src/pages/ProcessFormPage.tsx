@@ -34,6 +34,8 @@ export function ProcessFormPage() {
   const [steps, setSteps] = useState<StepDraft[]>([emptyStep(0)])
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null)
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -93,6 +95,30 @@ export function ProcessFormPage() {
       ;[next[index], next[target]] = [next[target], next[index]]
       return next.map((s, i) => ({ ...s, order: i }))
     })
+  }
+
+  const handleDragStart = (index: number) => setDraggedIdx(index)
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    if (draggedIdx === null || draggedIdx === index) return
+    setDragOverIdx(index)
+  }
+
+  const handleDrop = (index: number) => {
+    if (draggedIdx === null || draggedIdx === index) {
+      setDraggedIdx(null)
+      setDragOverIdx(null)
+      return
+    }
+    setSteps((prev) => {
+      const next = [...prev]
+      const [moved] = next.splice(draggedIdx, 1)
+      next.splice(index, 0, moved)
+      return next.map((s, i) => ({ ...s, order: i }))
+    })
+    setDraggedIdx(null)
+    setDragOverIdx(null)
   }
 
   const updateStep = (index: number, field: 'text' | 'warning', value: string) => {
@@ -347,31 +373,33 @@ export function ProcessFormPage() {
               {steps.map((step, i) => (
                 <div
                   key={i}
-                  className="rounded-xl border border-border bg-surface p-4"
+                  draggable
+                  onDragStart={() => handleDragStart(i)}
+                  onDragOver={(e) => handleDragOver(e, i)}
+                  onDrop={() => handleDrop(i)}
+                  onDragEnd={() => { setDraggedIdx(null); setDragOverIdx(null) }}
+                  className={`rounded-xl border bg-surface p-4 transition-all duration-150 ${
+                    draggedIdx === i
+                      ? 'opacity-40 shadow-none'
+                      : dragOverIdx === i
+                        ? 'border-accent shadow-md scale-[1.01]'
+                        : 'border-border'
+                  }`}
                 >
                   <div className="mb-2 flex items-center justify-between gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-bg text-xs font-bold text-accent">
-                      {i + 1}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {/* Drag handle */}
+                      <span
+                        className="cursor-grab touch-none select-none text-muted/50 hover:text-muted active:cursor-grabbing"
+                        title="Arrastrar para reordenar"
+                      >
+                        ⠿
+                      </span>
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-bg text-xs font-bold text-accent">
+                        {i + 1}
+                      </span>
+                    </div>
                     <div className="ml-auto flex gap-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => moveStep(i, -1)}
-                        disabled={i === 0}
-                      >
-                        ↑
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => moveStep(i, 1)}
-                        disabled={i === steps.length - 1}
-                      >
-                        ↓
-                      </Button>
                       <Button
                         type="button"
                         variant="ghost"
