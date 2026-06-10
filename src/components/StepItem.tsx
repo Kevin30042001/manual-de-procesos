@@ -61,7 +61,7 @@ export function StepItem({ step, index, isLast }: Props) {
         {/* Galería de capturas */}
         {images.length > 0 && (
           <>
-            <div className="mt-4 flex flex-wrap gap-3">
+            <div className="print-images mt-4 flex flex-wrap gap-3">
               {images.map((url, i) => (
                 <button
                   key={i}

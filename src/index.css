@@ -56,13 +56,40 @@ html, body, #root {
     page-break-inside: avoid;
   }
 
-  /* Images: max half-page width, keep aspect ratio */
-  .print-step img {
-    max-width: 45%;
-    max-height: 180px;
-    object-fit: contain;
-    border-radius: 4px;
-    border: 1px solid #ddd;
+  /* Image gallery: stack vertically, full width */
+  .print-step .print-images {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12pt !important;
+    margin-top: 8pt !important;
+  }
+
+  .print-step .print-images button {
+    display: block !important;
+    width: 100% !important;
+    border: none !important;
+    padding: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    cursor: default !important;
+  }
+
+  .print-step .print-images img {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 420pt !important;
+    object-fit: contain !important;
+    border-radius: 4pt !important;
+    border: 1pt solid #ccc !important;
+  }
+
+  /* Hide lightbox and hover labels in print */
+  .print-step .print-images span,
+  [role="dialog"] {
+    display: none !important;
   }
 
   /* Accent color fallback for print */
