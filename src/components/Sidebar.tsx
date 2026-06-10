@@ -39,7 +39,7 @@ export function Sidebar({
   mobileOpen,
   onMobileClose,
 }: Props) {
-  const { isAdmin, signOut, user } = useAuth()
+  const { signOut, user } = useAuth()
   const navigate = useNavigate()
 
   const userLabel = user?.email?.split('@')[0] ?? 'usuario'
@@ -148,15 +148,13 @@ export function Sidebar({
       ))}
 
       <div className="mt-auto flex flex-col gap-1 border-t border-border pt-4">
-        {isAdmin && (
-          <Link
-            to="/systems"
-            className="block rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-ink"
-            onClick={onMobileClose}
-          >
-            ⚙ Gestionar sistemas
-          </Link>
-        )}
+        <Link
+          to="/systems"
+          className="block rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-ink"
+          onClick={onMobileClose}
+        >
+          ⚙ Gestionar sistemas
+        </Link>
         <button
           onClick={async () => {
             await signOut()
