@@ -157,6 +157,13 @@ export function Sidebar({
             ⚙ Gestionar sistemas
           </Link>
         )}
+        <Link
+          to="/settings"
+          className="block rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-ink"
+          onClick={onMobileClose}
+        >
+          ✎ Configuración
+        </Link>
         <button
           onClick={async () => {
             await signOut()

@@ -99,7 +99,15 @@ export function LoginPage() {
               {loading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
-          <p className="mt-6 text-center text-sm text-muted">
+          <div className="mt-4 text-center">
+            <Link
+              to="/forgot-password"
+              className="text-sm text-muted transition-colors hover:text-accent"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
+          <p className="mt-4 text-center text-sm text-muted">
             ¿No tienes cuenta?{' '}
             <Link
               to="/register"
