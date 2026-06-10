@@ -35,16 +35,15 @@ export function HomePage() {
   const { processes, loading, toggleFavorite, filter } = useProcesses()
   const { systems } = useSystems()
 
-  const [selectedSystemId, setSelectedSystemId] = useState<string | null>(
-    null
-  )
+  const [selectedSystemId, setSelectedSystemId] = useState<string | null>(null)
   const [showFavOnly, setShowFavOnly] = useState(false)
+  const [showSharedOnly, setShowSharedOnly] = useState(false)
   const [search, setSearch] = useState('')
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const filtered = useMemo(
-    () => filter(processes, selectedSystemId, search, showFavOnly),
-    [processes, selectedSystemId, search, showFavOnly, filter]
+    () => filter(processes, selectedSystemId, search, showFavOnly, showSharedOnly),
+    [processes, selectedSystemId, search, showFavOnly, showSharedOnly, filter]
   )
 
   const processCounts = useMemo(() => {
@@ -58,10 +57,18 @@ export function HomePage() {
   const handleSelectSystem = (id: string | null) => {
     setSelectedSystemId(id)
     setShowFavOnly(false)
+    setShowSharedOnly(false)
   }
 
   const handleToggleFav = () => {
     setShowFavOnly((v) => !v)
+    setShowSharedOnly(false)
+    setSelectedSystemId(null)
+  }
+
+  const handleToggleShared = () => {
+    setShowSharedOnly((v) => !v)
+    setShowFavOnly(false)
     setSelectedSystemId(null)
   }
 
@@ -71,15 +78,17 @@ export function HomePage() {
 
   const pageTitle = showFavOnly
     ? 'Favoritos'
-    : activeSystemName
-      ? activeSystemName
-      : 'Todos los procesos'
+    : showSharedOnly
+      ? 'Compartidos'
+      : activeSystemName ?? 'Todos los procesos'
 
   const pageSubtitle = showFavOnly
     ? 'Tus procesos marcados'
-    : activeSystemName
-      ? `Procesos de ${activeSystemName}`
-      : 'Manual completo de operaciones'
+    : showSharedOnly
+      ? 'Procesos compartidos por el equipo'
+      : activeSystemName
+        ? `Procesos de ${activeSystemName}`
+        : 'Manual completo de operaciones'
 
   return (
     <div className="flex min-h-screen">
@@ -88,10 +97,13 @@ export function HomePage() {
         processCounts={processCounts}
         selectedSystemId={selectedSystemId}
         showFavOnly={showFavOnly}
+        showSharedOnly={showSharedOnly}
         totalCount={processes.length}
         favoriteCount={processes.filter((p) => p.is_favorite).length}
+        sharedCount={processes.filter((p) => p.is_shared).length}
         onSelectSystem={handleSelectSystem}
         onToggleFav={handleToggleFav}
+        onToggleShared={handleToggleShared}
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
       />

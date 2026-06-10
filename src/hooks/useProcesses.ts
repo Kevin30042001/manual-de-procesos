@@ -65,10 +65,12 @@ export function useProcesses() {
     all: ProcessWithSearch[],
     systemId: string | null,
     search: string,
-    favOnly: boolean
+    favOnly: boolean,
+    sharedOnly: boolean
   ): Process[] => {
     return all.filter((p) => {
       if (favOnly && !p.is_favorite) return false
+      if (sharedOnly && !p.is_shared) return false
       if (systemId && p.system_id !== systemId) return false
       if (search) {
         const q = search.toLowerCase()

@@ -7,10 +7,13 @@ interface Props {
   processCounts: Record<string, number>
   selectedSystemId: string | null
   showFavOnly: boolean
+  showSharedOnly: boolean
   totalCount: number
   favoriteCount: number
+  sharedCount: number
   onSelectSystem: (id: string | null) => void
   onToggleFav: () => void
+  onToggleShared: () => void
   mobileOpen: boolean
   onMobileClose: () => void
 }
@@ -32,10 +35,13 @@ export function Sidebar({
   processCounts,
   selectedSystemId,
   showFavOnly,
+  showSharedOnly,
   totalCount,
   favoriteCount,
+  sharedCount,
   onSelectSystem,
   onToggleFav,
+  onToggleShared,
   mobileOpen,
   onMobileClose,
 }: Props) {
@@ -116,6 +122,21 @@ export function Sidebar({
         </span>
         <span className="rounded-full bg-border/60 px-2 py-0.5 text-xs text-muted">
           {favoriteCount}
+        </span>
+      </Item>
+      <Item
+        active={showSharedOnly}
+        onClick={() => {
+          onToggleShared()
+          onMobileClose()
+        }}
+        accentColor="var(--color-accent)"
+      >
+        <span className="flex items-center gap-1.5">
+          <span>🔗</span> Compartidos
+        </span>
+        <span className="rounded-full bg-border/60 px-2 py-0.5 text-xs text-muted">
+          {sharedCount}
         </span>
       </Item>
 

@@ -13,6 +13,7 @@ export interface Process {
   category: string | null
   tags: string[]
   is_favorite: boolean
+  is_shared: boolean
   created_by: string
   created_at: string
   updated_at: string
