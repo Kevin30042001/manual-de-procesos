@@ -2,6 +2,7 @@ export interface System {
   id: string
   name: string
   color: string
+  created_by: string
   created_at: string
 }
 

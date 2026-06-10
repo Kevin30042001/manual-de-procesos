@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { System } from '../types'
+import { useAuth } from '../context/AuthContext'
 
 export function useSystems() {
+  const { user } = useAuth()
   const [systems, setSystems] = useState<System[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -17,7 +19,7 @@ export function useSystems() {
   }, [])
 
   const create = async (name: string, color: string) => {
-    await supabase.from('systems').insert({ name, color })
+    await supabase.from('systems').insert({ name, color, created_by: user!.id })
     await fetch()
   }
 
