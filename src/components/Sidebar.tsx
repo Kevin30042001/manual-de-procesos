@@ -39,10 +39,10 @@ export function Sidebar({
   mobileOpen,
   onMobileClose,
 }: Props) {
-  const { signOut, user, isAdmin } = useAuth()
+  const { signOut, user, isAdmin, fullName } = useAuth()
   const navigate = useNavigate()
 
-  const userLabel = user?.email?.split('@')[0] ?? 'usuario'
+  const userLabel = fullName || user?.email?.split('@')[0] || 'usuario'
 
   const Item = ({
     active,
