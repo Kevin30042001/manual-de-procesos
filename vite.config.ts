@@ -2,8 +2,6 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// Supabase project URL used to scope runtime caching of REST + Storage calls
-const SUPABASE_URL_PATTERN = /^https:\/\/[a-z0-9]+\.supabase\.co\/(rest|storage)\//
 
 export default defineConfig({
   plugins: [
@@ -78,9 +76,8 @@ export default defineConfig({
           // Supabase REST (data): network-first with cache fallback for offline reads
           {
             urlPattern: ({ url, request }) =>
-              SUPABASE_URL_PATTERN.test(url.href) &&
-              request.method === 'GET' &&
-              url.pathname.startsWith('/rest/'),
+              /^https:\/\/[a-z0-9]+\.supabase\.co\/rest\//.test(url.href) &&
+              request.method === 'GET',
             handler: 'NetworkFirst',
             options: {
               cacheName: 'supabase-rest',
