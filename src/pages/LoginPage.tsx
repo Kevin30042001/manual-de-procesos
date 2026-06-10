@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
@@ -99,6 +99,15 @@ export function LoginPage() {
               {loading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
+          <p className="mt-6 text-center text-sm text-muted">
+            ¿No tienes cuenta?{' '}
+            <Link
+              to="/register"
+              className="font-medium text-accent transition-colors hover:underline"
+            >
+              Regístrate
+            </Link>
+          </p>
         </div>
 
         <p className="mt-6 text-center font-serif text-xs italic text-muted/70">
