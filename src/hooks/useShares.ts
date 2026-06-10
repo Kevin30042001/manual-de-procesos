@@ -21,14 +21,23 @@ export function useShares(processId: string | undefined) {
 
   const fetchShares = async () => {
     if (!processId) return
-    const { data } = await supabase
+    const { data: rawShares } = await supabase
       .from('process_shares')
-      .select('id, shared_with, profile:profiles(id, full_name, email, puesto)')
+      .select('id, shared_with')
       .eq('process_id', processId)
-    // Supabase returns the FK join as array; normalize to single object
-    const normalized: Share[] = (data ?? []).map((row: any) => ({
-      ...row,
-      profile: Array.isArray(row.profile) ? row.profile[0] : row.profile,
+    if (!rawShares || rawShares.length === 0) { setShares([]); return }
+
+    const ids = rawShares.map((s) => s.shared_with)
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name, email, puesto')
+      .in('id', ids)
+
+    const profileMap = Object.fromEntries((profiles ?? []).map((p) => [p.id, p]))
+    const normalized: Share[] = rawShares.map((s) => ({
+      id: s.id,
+      shared_with: s.shared_with,
+      profile: profileMap[s.shared_with] ?? { id: s.shared_with, full_name: null, email: '', puesto: null },
     }))
     setShares(normalized)
   }
