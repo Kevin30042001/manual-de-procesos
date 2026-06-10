@@ -87,16 +87,6 @@ export function ProcessFormPage() {
     )
   }
 
-  const moveStep = (index: number, dir: -1 | 1) => {
-    setSteps((prev) => {
-      const next = [...prev]
-      const target = index + dir
-      if (target < 0 || target >= next.length) return prev
-      ;[next[index], next[target]] = [next[target], next[index]]
-      return next.map((s, i) => ({ ...s, order: i }))
-    })
-  }
-
   const handleDragStart = (index: number) => setDraggedIdx(index)
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
