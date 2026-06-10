@@ -6,6 +6,8 @@ interface AuthContextValue {
   user: User | null
   session: Session | null
   isAdmin: boolean
+  puesto: string | null
+  fullName: string | null
   loading: boolean
   signOut: () => Promise<void>
 }
@@ -14,6 +16,8 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   session: null,
   isAdmin: false,
+  puesto: null,
+  fullName: null,
   loading: true,
   signOut: async () => {},
 })
@@ -36,6 +40,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const isAdmin = session?.user?.user_metadata?.role === 'admin'
+  const puesto: string | null = session?.user?.user_metadata?.puesto ?? null
+  const fullName: string | null =
+    session?.user?.user_metadata?.full_name ?? null
 
   const signOut = async () => {
     await supabase.auth.signOut()
@@ -47,6 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user: session?.user ?? null,
         session,
         isAdmin,
+        puesto,
+        fullName,
         loading,
         signOut,
       }}
