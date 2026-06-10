@@ -8,6 +8,7 @@ import { Process } from '../types'
 import { SystemBadge } from '../components/SystemBadge'
 import { StepItem } from '../components/StepItem'
 import { Button } from '../components/ui/Button'
+import { ShareModal } from '../components/ShareModal'
 
 export function ProcessDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -17,6 +18,7 @@ export function ProcessDetailPage() {
   const [process, setProcess] = useState<Process | null>(null)
   const [loading, setLoading] = useState(true)
   const [cloning, setCloning] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -186,8 +188,8 @@ export function ProcessDetailPage() {
                   Editar
                 </Button>
               </Link>
-              <Button variant="secondary" onClick={toggleShared}>
-                {process.is_shared ? '🔒 Hacer privado' : '🔗 Compartir'}
+              <Button variant="secondary" onClick={() => setShareOpen(true)}>
+                🔗 Compartir
               </Button>
               <Button variant="danger" onClick={handleDelete}>
                 Eliminar
@@ -200,6 +202,17 @@ export function ProcessDetailPage() {
           )}
         </div>
       </div>
+
+      {process && (
+        <ShareModal
+          open={shareOpen}
+          onClose={() => setShareOpen(false)}
+          processId={process.id}
+          processTitle={process.title}
+          isSharedPublic={process.is_shared}
+          onTogglePublic={toggleShared}
+        />
+      )}
     </div>
   )
 }
