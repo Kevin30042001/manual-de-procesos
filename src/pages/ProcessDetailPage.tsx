@@ -20,6 +20,8 @@ export function ProcessDetailPage() {
   const [cloning, setCloning] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
 
+  const handlePrint = () => window.print()
+
   useEffect(() => {
     if (!id) return
     supabase
@@ -100,10 +102,10 @@ export function ProcessDetailPage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <div className="mx-auto max-w-3xl px-4 py-8 md:py-12">
+      <div id="print-area" className="mx-auto max-w-3xl px-4 py-8 md:py-12">
         <Link
           to="/"
-          className="mb-8 inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
+          className="no-print mb-8 inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
             <line x1="19" y1="12" x2="5" y2="12" />
@@ -154,7 +156,9 @@ export function ProcessDetailPage() {
             <p className="text-sm text-muted">Cargando pasos...</p>
           ) : (
             steps.map((step, i) => (
-              <StepItem key={step.id} step={step} index={i} isLast={i === steps.length - 1} />
+              <div key={step.id} className="print-step">
+                <StepItem step={step} index={i} isLast={i === steps.length - 1} />
+              </div>
             ))
           )}
         </div>
@@ -176,7 +180,7 @@ export function ProcessDetailPage() {
         )}
 
         {/* Acciones */}
-        <div className="mt-10 flex flex-wrap gap-3 border-t border-border pt-6">
+        <div className="no-print mt-10 flex flex-wrap gap-3 border-t border-border pt-6">
           {isOwner ? (
             <>
               <Link to={`/processes/${process.id}/edit`}>
@@ -191,14 +195,22 @@ export function ProcessDetailPage() {
               <Button variant="secondary" onClick={() => setShareOpen(true)}>
                 🔗 Compartir
               </Button>
+              <Button variant="secondary" onClick={handlePrint}>
+                ⬇ Exportar PDF
+              </Button>
               <Button variant="danger" onClick={handleDelete}>
                 Eliminar
               </Button>
             </>
           ) : (
-            <Button onClick={handleClone} disabled={cloning}>
-              {cloning ? 'Clonando...' : '⎘ Clonar a mi cuenta'}
-            </Button>
+            <>
+              <Button onClick={handleClone} disabled={cloning}>
+                {cloning ? 'Clonando...' : '⎘ Clonar a mi cuenta'}
+              </Button>
+              <Button variant="secondary" onClick={handlePrint}>
+                ⬇ Exportar PDF
+              </Button>
+            </>
           )}
         </div>
       </div>

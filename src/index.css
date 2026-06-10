@@ -20,6 +20,58 @@ html, body, #root {
   min-height: 100vh;
 }
 
+/* ── Print / PDF export ─────────────────────────────────────────── */
+@media print {
+  /* Hide everything except the process content */
+  .no-print { display: none !important; }
+
+  body {
+    background: #fff !important;
+    color: #1a1a1a !important;
+    font-family: 'Karla', sans-serif;
+    font-size: 11pt;
+  }
+
+  #print-area {
+    display: block !important;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Page margins */
+  @page {
+    margin: 20mm 18mm;
+    size: A4;
+  }
+
+  /* Typography */
+  h1 { font-size: 22pt; margin-bottom: 4pt; }
+  h2 { font-size: 14pt; margin-bottom: 2pt; }
+
+  /* Steps: avoid breaking a step across pages */
+  .print-step {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Images: max half-page width, keep aspect ratio */
+  .print-step img {
+    max-width: 45%;
+    max-height: 180px;
+    object-fit: contain;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+  }
+
+  /* Accent color fallback for print */
+  .print-accent { color: #4d7d68 !important; }
+  .print-warn   { color: #c89a54 !important; }
+
+  a { text-decoration: none; color: inherit; }
+}
+
 body {
   margin: 0;
   background-color: var(--color-bg);
