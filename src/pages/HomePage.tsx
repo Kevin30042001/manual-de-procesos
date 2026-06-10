@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useProcesses } from '../hooks/useProcesses'
 import { useSystems } from '../hooks/useSystems'
-import { useAuth } from '../context/AuthContext'
 import { ProcessCard } from '../components/ProcessCard'
 import { Sidebar } from '../components/Sidebar'
 import { Button } from '../components/ui/Button'
@@ -35,7 +34,6 @@ function EmptyIllustration() {
 export function HomePage() {
   const { processes, loading, toggleFavorite, filter } = useProcesses()
   const { systems } = useSystems()
-  const { isAdmin } = useAuth()
 
   const [selectedSystemId, setSelectedSystemId] = useState<string | null>(
     null
@@ -160,14 +158,12 @@ export function HomePage() {
               className="w-full rounded-lg border border-border bg-surface py-2.5 pl-9 pr-4 text-sm text-ink placeholder-muted shadow-sm transition-shadow focus:border-accent focus:shadow-md focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </div>
-          {isAdmin && (
-            <Link to="/processes/new">
-              <Button>
-                <span className="mr-1.5 text-lg leading-none">+</span> Nuevo
-                proceso
-              </Button>
-            </Link>
-          )}
+          <Link to="/processes/new">
+            <Button>
+              <span className="mr-1.5 text-lg leading-none">+</span> Nuevo
+              proceso
+            </Button>
+          </Link>
         </div>
 
         {/* List */}
